@@ -1,0 +1,3 @@
+[submodule "third_party_libs/soloud"]
+	path = third_party_libs/soloud
+	url = https://github.com/Silverlan/soloud.git
