@@ -1,0 +1,62 @@
+name: Build Linux
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: environment-lin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-22.04
+            name: "Ubuntu GCC-11"
+            artifact: "ubuntu_gcc.7z"
+            build_type: "RelWithDebInfo"
+            cc: "clang-14"
+            cxx: "clang++-14"
+            archiver: "7z a"
+            generators: "Unix Makefiles"
+            build_dir: 'build'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          
+      - name: Setup Pragma Module
+        id: pragma-cmake-defs
+        uses: Silverlan/common_actions/setup_pragma_module@main
+        with:
+          cc_version: ${{ matrix.cc }}
+          cxx_version: ${{ matrix.cxx }}
+
+      - name: Build
+        shell: bash
+        run: |
+          cmake -G "Unix Makefiles" \
+            -DDEPENDENCY_SOLOUD_INCLUDE="./third_party_libs/soloud/include/" \
+            ${{ steps.pragma-cmake-defs.outputs.cmake_defs }}
+          cmake --build ./ --verbose --target pr_audio_soloud
+
+      - name: Create Release Files
+        shell: bash
+        run: |
+          mkdir release
+          mkdir release/modules
+          mkdir release/modules/audio
+          mkdir release/modules/audio/soloud
+          rsync --mkpath ./libpr_audio_soloud.so release/modules/audio/soloud/
+          
+      - name: Release Binaries
+        uses: Silverlan/common_actions/release_nightly_binaries@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.ref_name }}
