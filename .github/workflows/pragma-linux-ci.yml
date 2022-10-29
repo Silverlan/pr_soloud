@@ -46,6 +46,9 @@ jobs:
             ${{ steps.pragma-cmake-defs.outputs.cmake_defs }}
           cmake --build ./ --verbose --target pr_audio_soloud
 
+      - uses: mxschmitt/action-tmate@v3
+        name: CI
+
       - name: Create Release Files
         shell: bash
         run: |
