@@ -43,6 +43,7 @@ jobs:
         run: |
           cmake -G "Unix Makefiles" \
             -DDEPENDENCY_SOLOUD_INCLUDE="./third_party_libs/soloud/include/" \
+            -DDEPENDENCY_SOLOUD_LIBRARY="./third_party_libs/soloud/contrib/libsoloud.a" \
             ${{ steps.pragma-cmake-defs.outputs.cmake_defs }}
           cmake --build ./ --verbose --target pr_audio_soloud
 
