@@ -38,17 +38,27 @@ jobs:
           cc_version: ${{ matrix.cc }}
           cxx_version: ${{ matrix.cxx }}
 
+      - name: Print CMake Vars
+        shell: bash
+        run: |
+          echo "${{ steps.pragma-cmake-defs.outputs.cmake_defs }}"
+
+      - name: Get alsoundsystem binaries
+        shell: bash
+        run: |
+          wget https://github.com/Silverlan/tmp_alsoundsystem_ci/releases/download/latest/binaries_linux64.tar.gz
+          tar xvfz binaries_linux64.tar.gz
+          rm -f binaries_linux64.tar.gz
+
       - name: Build
         shell: bash
         run: |
           cmake -G "Unix Makefiles" \
             -DDEPENDENCY_SOLOUD_INCLUDE="./third_party_libs/soloud/include/" \
             -DDEPENDENCY_SOLOUD_LIBRARY="./third_party_libs/soloud/contrib/libsoloud.a" \
+            -DDEPENDENCY_ALSOUNDSYSTEM_LIBRARY="./lib/libalsoundsystem.so" \
             ${{ steps.pragma-cmake-defs.outputs.cmake_defs }}
           cmake --build ./ --verbose --target pr_audio_soloud
-
-      - uses: mxschmitt/action-tmate@v3
-        name: CI
 
       - name: Create Release Files
         shell: bash
