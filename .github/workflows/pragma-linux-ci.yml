@@ -46,7 +46,7 @@ jobs:
       - name: Get alsoundsystem binaries
         shell: bash
         run: |
-          wget https://github.com/Silverlan/tmp_alsoundsystem_ci/releases/download/latest/binaries_linux64.tar.gz
+          wget https://github.com/Silverlan/alsoundsystem/releases/download/latest/binaries_linux64.tar.gz
           tar xvfz binaries_linux64.tar.gz
           rm -f binaries_linux64.tar.gz
 
@@ -74,3 +74,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.ref_name }}
+
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()
