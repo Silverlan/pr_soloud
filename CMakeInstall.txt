@@ -1,4 +1,4 @@
 pragma_install_create_directory(modules/audio)
 pragma_install_create_directory(modules/audio/soloud)
-pragma_install_lib("${CMAKE_CURRENT_BINARY_DIR}/modules/pr_soloud/${PR_MODULE_INSTALL_SUBDIR}/pr_audio_soloud${OS_LIB_BIN_EXT}" "modules/audio/soloud/" OPTIONAL)
-pragma_install_lib("${CMAKE_CURRENT_BINARY_DIR}/modules/pr_audio_soloud/${PR_MODULE_INSTALL_SUBDIR}/pr_audio_soloud${OS_LIB_BIN_EXT}" "modules/audio/soloud/" OPTIONAL)
+pragma_install_lib("${CMAKE_CURRENT_BINARY_DIR}/modules/pr_soloud/${PR_MODULE_INSTALL_SUBDIR}/${OS_LIB_BIN_PRE}pr_audio_soloud${OS_LIB_BIN_EXT}" "modules/audio/soloud/" OPTIONAL)
+pragma_install_lib("${CMAKE_CURRENT_BINARY_DIR}/modules/pr_audio_soloud/${PR_MODULE_INSTALL_SUBDIR}/${OS_LIB_BIN_PRE}pr_audio_soloud${OS_LIB_BIN_EXT}" "modules/audio/soloud/" OPTIONAL)

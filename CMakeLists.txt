@@ -6,17 +6,19 @@ set(PROJ_NAME pr_audio_soloud)
 
 project(${PROJ_NAME} CXX)
 
+set(DEPENDENCY_SOLOUD_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/soloud/include/" CACHE STRING "" FORCE)
+
 add_include_dir(glm)
 link_external_library(alsoundsystem)
 link_external_library(soloud)
+
+search_lib_recursive(DEPENDENCY_SOLOUD_LIBRARY third_party_libs/soloud/contrib/${BINARY_PRAGMA_DIR} soloud STATIC)
 
 link_generic_module_libraries()
 register_pragma_module(${PROJ_NAME})
 
 SET(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
 SET(SOLOUD_BACKEND_MINIAUDIO ON CACHE BOOL "" FORCE)
-set(DEPENDENCY_SOLOUD_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/third_party_libs/soloud/include/" CACHE STRING "" FORCE)
-search_lib_recursive(DEPENDENCY_SOLOUD_LIBRARY third_party_libs/soloud/contrib/${BINARY_PRAGMA_DIR} soloud STATIC)
 
 add_subdirectory(third_party_libs/soloud/contrib)
 
