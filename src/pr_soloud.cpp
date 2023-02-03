@@ -3,6 +3,7 @@
 #include <alsound_source.hpp>
 #include <alsound_buffer.hpp>
 #include <alsound_listener.hpp>
+#include <fsys/filesystem.h>
 #include <sharedutils/util_pragma.hpp>
 #include <soloud.h>
 #include <soloud_wav.h>
@@ -382,9 +383,12 @@ al::PSoundChannel al::SoloudSoundSystem::CreateChannel(ISoundBuffer &buffer)
 }
 al::ISoundBuffer *al::SoloudSoundSystem::DoLoadSound(const std::string &path, bool bConvertToMono, bool bAsync)
 {
+	std::string absPath;
+	if(!FileManager::FindAbsolutePath(path, absPath))
+		return nullptr;
 	auto buf = std::make_shared<SoloudSoundBuffer>();
 	auto &wave = buf->GetSoloudWave();
-	auto res = static_cast<SoloudError>(wave.load(path.c_str()));
+	auto res = static_cast<SoloudError>(wave.load(absPath.c_str()));
 	if(res != al::SoloudError::NoError)
 		return nullptr;
 	if(buf->GetChannelConfig() == al::ChannelConfig::Mono || bConvertToMono == true)
