@@ -79,8 +79,8 @@ namespace al {
 		virtual bool IsPaused() const override;
 		virtual void SetPriority(uint32_t priority) override;
 		virtual uint32_t GetPriority() const override;
-		virtual void SetFrameOffset(uint64_t offset) override;
-		virtual uint64_t GetFrameOffset(uint64_t *latency = nullptr) const override;
+		virtual void SetOffset(double offset) override;
+		virtual double GetOffset() const override;
 		virtual void SetLooping(bool bLoop) override;
 		virtual bool IsLooping() const override;
 
@@ -143,7 +143,9 @@ namespace al {
 		virtual void SetEffectParameters(uint32_t slotId, const EffectParams &params) override;
 
 		SoLoud::Soloud &GetSoloudEngine() { return static_cast<SoloudSoundSystem &>(m_system).GetSoloudEngine(); }
+		SoLoud::Soloud &GetSoloudEngine() const { return static_cast<SoloudSoundSystem &>(m_system).GetSoloudEngine(); }
 	  private:
+		SoLoud::WavInstance &GetWavInstance() const { return const_cast<SoLoud::WavInstance &>(m_instance); }
 		virtual void DoAddEffect(IAuxiliaryEffectSlot &slot, uint32_t slotId, const EffectParams &params) override {}
 		virtual void DoRemoveInternalEffect(uint32_t slotId) override {}
 		virtual void DoRemoveEffect(uint32_t slotId) override {}
@@ -195,23 +197,19 @@ namespace al {
 	class SoloudSoundBuffer : public ISoundBuffer {
 	  public:
 		SoloudSoundBuffer();
-		virtual uint32_t GetFrequency() const override { return 0; }
-		virtual ChannelConfig GetChannelConfig() const override { return ChannelConfig::Mono; }
-		virtual SampleType GetSampleType() const override { return SampleType::Float32; }
-		virtual uint64_t GetLength() const override { return 0; }
-		virtual std::pair<uint64_t, uint64_t> GetLoopFramePoints() const override { return {}; }
+		virtual double GetDuration() const override { return GetSoloudWave().getLength(); }
+		virtual double GetLoopPoint() const { return GetSoloudWave().getLoopPoint(); }
+		virtual void SetLoopPoint(double t) override { GetSoloudWave().setLoopPoint(t); }
 
 		virtual bool IsReady() const override { return true; }
-
-		virtual uint32_t GetSize() const override { return 0; }
-		virtual void SetLoopFramePoints(uint32_t start, uint32_t end) override {}
-		virtual void SetLoopTimePoints(float tStart, float tEnd) override {}
+		virtual bool IsStereo() const override { return GetSoloudWave().mChannels > 1; }
 
 		virtual std::string GetName() const override { return ""; }
 		virtual bool IsInUse() const override { return false; }
 
 		SoLoud::Wav &GetSoloudWave() { return m_wave; }
 	  private:
+		SoLoud::Wav &GetSoloudWave() const { return const_cast<SoLoud::Wav &>(m_wave); }
 		SoLoud::Wav m_wave;
 	};
 };
@@ -249,8 +247,8 @@ bool al::SoloudSoundChannel::IsPlaying() const { return m_state == State::Playin
 bool al::SoloudSoundChannel::IsPaused() const { return m_state == State::Paused; }
 void al::SoloudSoundChannel::SetPriority(uint32_t priority) { m_priority = priority; }
 uint32_t al::SoloudSoundChannel::GetPriority() const { return m_priority; }
-void al::SoloudSoundChannel::SetFrameOffset(uint64_t offset) {}
-uint64_t al::SoloudSoundChannel::GetFrameOffset(uint64_t *latency) const { return 0; }
+void al::SoloudSoundChannel::SetOffset(double offset) { GetSoloudEngine().seek(m_handle, offset); }
+double al::SoloudSoundChannel::GetOffset() const { return GetSoloudEngine().getStreamPosition(m_handle); }
 void al::SoloudSoundChannel::SetLooping(bool bLoop)
 {
 	m_looping = bLoop;
@@ -391,7 +389,7 @@ al::ISoundBuffer *al::SoloudSoundSystem::DoLoadSound(const std::string &path, bo
 	auto res = static_cast<SoloudError>(wave.load(absPath.c_str()));
 	if(res != al::SoloudError::NoError)
 		return nullptr;
-	if(buf->GetChannelConfig() == al::ChannelConfig::Mono || bConvertToMono == true)
+	if(buf->IsMono() || bConvertToMono == true)
 		m_buffers[path].mono = buf;
 	else
 		m_buffers[path].stereo = buf;
