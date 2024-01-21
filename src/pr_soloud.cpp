@@ -247,7 +247,11 @@ bool al::SoloudSoundChannel::IsPlaying() const { return m_state == State::Playin
 bool al::SoloudSoundChannel::IsPaused() const { return m_state == State::Paused; }
 void al::SoloudSoundChannel::SetPriority(uint32_t priority) { m_priority = priority; }
 uint32_t al::SoloudSoundChannel::GetPriority() const { return m_priority; }
-void al::SoloudSoundChannel::SetOffset(double offset) { GetSoloudEngine().seek(m_handle, offset); }
+void al::SoloudSoundChannel::SetOffset(double offset)
+{
+	offset = umath::max(offset, 0.0);
+	GetSoloudEngine().seek(m_handle, offset);
+}
 double al::SoloudSoundChannel::GetOffset() const { return GetSoloudEngine().getStreamPosition(m_handle); }
 void al::SoloudSoundChannel::SetLooping(bool bLoop)
 {
