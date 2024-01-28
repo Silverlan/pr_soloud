@@ -243,7 +243,12 @@ void al::SoloudSoundChannel::Pause()
 		GetSoloudEngine().setPause(m_handle, true);
 }
 void al::SoloudSoundChannel::Resume() { Play(); }
-bool al::SoloudSoundChannel::IsPlaying() const { return m_state == State::Playing; }
+bool al::SoloudSoundChannel::IsPlaying() const
+{
+	if(m_state != State::Playing)
+		return false;
+	return GetSoloudEngine().isValidVoiceHandle(m_handle);
+}
 bool al::SoloudSoundChannel::IsPaused() const { return m_state == State::Paused; }
 void al::SoloudSoundChannel::SetPriority(uint32_t priority) { m_priority = priority; }
 uint32_t al::SoloudSoundChannel::GetPriority() const { return m_priority; }
