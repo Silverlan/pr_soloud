@@ -1,0 +1,6 @@
+{
+    "name": "Soloud Audio",
+    "module_name": "pr_audio_soloud",
+    "install_directory": "modules/audio/soloud/",
+    "release_directory": "modules/audio/soloud/"
+}
