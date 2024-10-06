@@ -154,7 +154,7 @@ namespace al {
 		bool m_looping = false;
 		bool m_relative = false;
 		float m_refDist = 0.f;
-		float m_maxDist = util::pragma::metres_to_units(1.0);
+		float m_maxDist = pragma::metres_to_units(1.0);
 		uint32_t m_priority = 0;
 		float m_radius = 0.f;
 		float m_pitch = 1.f;
