@@ -222,6 +222,8 @@ al::SoloudError al::SoloudSoundSystem::Initialize() { return static_cast<SoloudE
 
 void al::SoloudSoundChannel::Play()
 {
+	if(IsPlaying())
+		return;
 	m_state = State::Playing;
 	if(m_buffer.expired())
 		return;
