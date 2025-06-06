@@ -218,7 +218,13 @@ al::SoloudSoundSystem::SoloudSoundSystem(float metersPerUnit) : ISoundSystem {me
 
 al::SoloudSoundSystem::~SoloudSoundSystem() { m_soloud.deinit(); }
 
-al::SoloudError al::SoloudSoundSystem::Initialize() { return static_cast<SoloudError>(m_soloud.init()); }
+al::SoloudError al::SoloudSoundSystem::Initialize()
+{
+	auto err = static_cast<SoloudError>(m_soloud.init());
+	if(err == al::SoloudError::NoError)
+		al::ISoundSystem::Initialize();
+	return err;
+}
 
 void al::SoloudSoundChannel::Play()
 {
