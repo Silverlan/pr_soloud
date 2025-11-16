@@ -7,6 +7,8 @@
 import pragma.filesystem;
 import pragma.soundsystem;
 
+#undef max
+
 namespace al {
 	enum class SoloudError : uint32_t {
 		NoError = SoLoud::SO_NO_ERROR,                // No error
