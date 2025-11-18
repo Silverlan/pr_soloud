@@ -1,15 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2022 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "pr_soloud.hpp"
-#include <alsoundsystem.hpp>
-#include <alsound_source.hpp>
-#include <alsound_buffer.hpp>
-#include <alsound_listener.hpp>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_pragma.hpp>
 #include <soloud.h>
 #include <soloud_wav.h>
+
+import pragma.filesystem;
+import pragma.soundsystem;
+
+#undef max
 
 namespace al {
 	enum class SoloudError : uint32_t {
@@ -435,14 +433,8 @@ void al::SoloudListener::SetOrientation(const Vector3 &at, const Vector3 &up)
 	static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerUp(up.x, up.y, up.z);
 }
 
-#ifdef __linux__
-#define DLLEXPORT __attribute__((visibility("default")))
-#else
-#define DLLEXPORT __declspec(dllexport)
-#endif
-
 extern "C" {
-DLLEXPORT bool initialize_audio_api(float metersPerUnit, std::shared_ptr<al::ISoundSystem> &outSoundSystem, std::string &errMsg)
+PR_EXPORT bool initialize_audio_api(float metersPerUnit, std::shared_ptr<al::ISoundSystem> &outSoundSystem, std::string &errMsg)
 {
 	auto sys = std::shared_ptr<al::SoloudSoundSystem>(new al::SoloudSoundSystem {metersPerUnit}, [](al::SoloudSoundSystem *sys) {
 		sys->OnRelease();

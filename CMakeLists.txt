@@ -6,7 +6,6 @@ pr_add_module(${PROJ_NAME} SHARED "modules/audio/soloud/")
 pr_add_dependency(${PROJ_NAME} shared TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} alsoundsystem TARGET PUBLIC)
 
-pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
 
 SET(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
