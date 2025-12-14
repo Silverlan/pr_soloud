@@ -9,7 +9,7 @@ import pragma.soundsystem;
 
 #undef max
 
-namespace al {
+namespace pragma::audio {
 	enum class SoloudError : uint32_t {
 		NoError = SoLoud::SO_NO_ERROR,                // No error
 		InvalidParameter = SoLoud::INVALID_PARAMETER, // Some parameter is invalid
@@ -185,7 +185,7 @@ namespace al {
 
 	class SoloudListener : public IListener {
 	  public:
-		SoloudListener(al::ISoundSystem &system) : IListener {system} {}
+		SoloudListener(pragma::audio::ISoundSystem &system) : IListener {system} {}
 
 		virtual void SetGain(float gain) override;
 		virtual void SetPosition(const Vector3 &pos) override;
@@ -215,19 +215,19 @@ namespace al {
 	};
 };
 
-al::SoloudSoundSystem::SoloudSoundSystem(float metersPerUnit) : ISoundSystem {metersPerUnit} {}
+pragma::audio::SoloudSoundSystem::SoloudSoundSystem(float metersPerUnit) : ISoundSystem {metersPerUnit} {}
 
-al::SoloudSoundSystem::~SoloudSoundSystem() { m_soloud.deinit(); }
+pragma::audio::SoloudSoundSystem::~SoloudSoundSystem() { m_soloud.deinit(); }
 
-al::SoloudError al::SoloudSoundSystem::Initialize()
+pragma::audio::SoloudError pragma::audio::SoloudSoundSystem::Initialize()
 {
 	auto err = static_cast<SoloudError>(m_soloud.init());
-	if(err == al::SoloudError::NoError)
-		al::ISoundSystem::Initialize();
+	if(err == pragma::audio::SoloudError::NoError)
+		pragma::audio::ISoundSystem::Initialize();
 	return err;
 }
 
-void al::SoloudSoundChannel::Play()
+void pragma::audio::SoloudSoundChannel::Play()
 {
 	if(IsPlaying())
 		return;
@@ -237,7 +237,7 @@ void al::SoloudSoundChannel::Play()
 	auto &wave = static_cast<SoloudSoundBuffer *>(m_buffer.lock().get())->GetSoloudWave();
 	m_handle = GetSoloudEngine().play(wave, GetGain(), 0.f, false);
 }
-void al::SoloudSoundChannel::Stop()
+void pragma::audio::SoloudSoundChannel::Stop()
 {
 	m_state = State::Stopped;
 	if(m_handle) {
@@ -245,167 +245,167 @@ void al::SoloudSoundChannel::Stop()
 		m_handle = 0;
 	}
 }
-void al::SoloudSoundChannel::Pause()
+void pragma::audio::SoloudSoundChannel::Pause()
 {
 	m_state = State::Paused;
 	if(m_handle)
 		GetSoloudEngine().setPause(m_handle, true);
 }
-void al::SoloudSoundChannel::Resume() { Play(); }
-bool al::SoloudSoundChannel::IsPlaying() const
+void pragma::audio::SoloudSoundChannel::Resume() { Play(); }
+bool pragma::audio::SoloudSoundChannel::IsPlaying() const
 {
 	if(m_state != State::Playing)
 		return false;
 	return GetSoloudEngine().isValidVoiceHandle(m_handle);
 }
-bool al::SoloudSoundChannel::IsPaused() const { return m_state == State::Paused; }
-void al::SoloudSoundChannel::SetPriority(uint32_t priority) { m_priority = priority; }
-uint32_t al::SoloudSoundChannel::GetPriority() const { return m_priority; }
-void al::SoloudSoundChannel::SetOffset(double offset)
+bool pragma::audio::SoloudSoundChannel::IsPaused() const { return m_state == State::Paused; }
+void pragma::audio::SoloudSoundChannel::SetPriority(uint32_t priority) { m_priority = priority; }
+uint32_t pragma::audio::SoloudSoundChannel::GetPriority() const { return m_priority; }
+void pragma::audio::SoloudSoundChannel::SetOffset(double offset)
 {
-	offset = umath::max(offset, 0.0);
+	offset = pragma::math::max(offset, 0.0);
 	GetSoloudEngine().seek(m_handle, offset);
 }
-double al::SoloudSoundChannel::GetOffset() const { return GetSoloudEngine().getStreamPosition(m_handle); }
-void al::SoloudSoundChannel::SetLooping(bool bLoop)
+double pragma::audio::SoloudSoundChannel::GetOffset() const { return GetSoloudEngine().getStreamPosition(m_handle); }
+void pragma::audio::SoloudSoundChannel::SetLooping(bool bLoop)
 {
 	m_looping = bLoop;
 	//GetSoloudEngine().setLooping(m_handle);
 }
-bool al::SoloudSoundChannel::IsLooping() const { return m_looping; }
+bool pragma::audio::SoloudSoundChannel::IsLooping() const { return m_looping; }
 
-void al::SoloudSoundChannel::SetPitch(float pitch)
+void pragma::audio::SoloudSoundChannel::SetPitch(float pitch)
 {
 	m_pitch = pitch;
 	// TODO: Not yet implemented
 	// Can be implemented via FFTFilter https://github.com/jarikomppa/soloud/issues/261
 }
-float al::SoloudSoundChannel::GetPitch() const { return m_pitch; }
+float pragma::audio::SoloudSoundChannel::GetPitch() const { return m_pitch; }
 
-void al::SoloudSoundChannel::SetGain(float gain)
+void pragma::audio::SoloudSoundChannel::SetGain(float gain)
 {
 	m_gain = gain;
 	if(m_handle)
 		GetSoloudEngine().setVolume(m_handle, gain);
 }
-float al::SoloudSoundChannel::GetGain() const { return m_gain; }
+float pragma::audio::SoloudSoundChannel::GetGain() const { return m_gain; }
 
-void al::SoloudSoundChannel::SetGainRange(float minGain, float maxGain)
+void pragma::audio::SoloudSoundChannel::SetGainRange(float minGain, float maxGain)
 {
 	m_minGain = minGain;
 	m_maxGain = maxGain;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetGainRange() const { return {m_minGain, m_maxGain}; }
-float al::SoloudSoundChannel::GetMinGain() const { return m_minGain; }
-float al::SoloudSoundChannel::GetMaxGain() const { return m_maxGain; }
-void al::SoloudSoundChannel::SetDistanceRange(float refDist, float maxDist)
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetGainRange() const { return {m_minGain, m_maxGain}; }
+float pragma::audio::SoloudSoundChannel::GetMinGain() const { return m_minGain; }
+float pragma::audio::SoloudSoundChannel::GetMaxGain() const { return m_maxGain; }
+void pragma::audio::SoloudSoundChannel::SetDistanceRange(float refDist, float maxDist)
 {
 	m_refDist = refDist;
 	m_maxDist = maxDist;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetDistanceRange() const { return {m_refDist, m_maxDist}; }
-void al::SoloudSoundChannel::SetPosition(const Vector3 &pos)
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetDistanceRange() const { return {m_refDist, m_maxDist}; }
+void pragma::audio::SoloudSoundChannel::SetPosition(const Vector3 &pos)
 {
 	m_pos = pos;
 	if(m_handle)
 		GetSoloudEngine().set3dSourcePosition(m_handle, pos.x, pos.y, pos.z);
 }
-Vector3 al::SoloudSoundChannel::GetPosition() const { return m_pos; }
-void al::SoloudSoundChannel::SetVelocity(const Vector3 &vel)
+Vector3 pragma::audio::SoloudSoundChannel::GetPosition() const { return m_pos; }
+void pragma::audio::SoloudSoundChannel::SetVelocity(const Vector3 &vel)
 {
 	m_velocity = vel;
 	if(m_handle)
 		GetSoloudEngine().set3dSourceVelocity(m_handle, vel.x, vel.y, vel.z);
 }
-Vector3 al::SoloudSoundChannel::GetVelocity() const { return m_velocity; }
+Vector3 pragma::audio::SoloudSoundChannel::GetVelocity() const { return m_velocity; }
 
-void al::SoloudSoundChannel::SetDirection(const Vector3 &dir) { m_direction = dir; }
-Vector3 al::SoloudSoundChannel::GetDirection() const { return m_direction; }
+void pragma::audio::SoloudSoundChannel::SetDirection(const Vector3 &dir) { m_direction = dir; }
+Vector3 pragma::audio::SoloudSoundChannel::GetDirection() const { return m_direction; }
 
-void al::SoloudSoundChannel::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::SoloudSoundChannel::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	m_at = at;
 	m_up = up;
 }
-std::pair<Vector3, Vector3> al::SoloudSoundChannel::GetOrientation() const { return {m_at, m_up}; }
+std::pair<Vector3, Vector3> pragma::audio::SoloudSoundChannel::GetOrientation() const { return {m_at, m_up}; }
 
-void al::SoloudSoundChannel::SetConeAngles(float inner, float outer)
+void pragma::audio::SoloudSoundChannel::SetConeAngles(float inner, float outer)
 {
 	m_innerConeAngles = inner;
 	m_outerConeAngles = outer;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetConeAngles() const { return {m_innerConeAngles, m_outerConeAngles}; }
-void al::SoloudSoundChannel::SetOuterConeGains(float gain, float gainHF)
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetConeAngles() const { return {m_innerConeAngles, m_outerConeAngles}; }
+void pragma::audio::SoloudSoundChannel::SetOuterConeGains(float gain, float gainHF)
 {
 	m_outerConeGain = gain;
 	m_outerConeGainHf = gainHF;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetOuterConeGains() const { return {m_outerConeGain, m_outerConeGainHf}; }
-float al::SoloudSoundChannel::GetOuterConeGain() const { return m_outerConeGain; }
-float al::SoloudSoundChannel::GetOuterConeGainHF() const { return m_outerConeGainHf; }
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetOuterConeGains() const { return {m_outerConeGain, m_outerConeGainHf}; }
+float pragma::audio::SoloudSoundChannel::GetOuterConeGain() const { return m_outerConeGain; }
+float pragma::audio::SoloudSoundChannel::GetOuterConeGainHF() const { return m_outerConeGainHf; }
 
-void al::SoloudSoundChannel::SetRolloffFactors(float factor, float roomFactor)
+void pragma::audio::SoloudSoundChannel::SetRolloffFactors(float factor, float roomFactor)
 {
 	m_rolloffFactor = factor;
 	m_roomRolloffFactor = roomFactor;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetRolloffFactors() const { return {m_rolloffFactor, m_roomRolloffFactor}; }
-float al::SoloudSoundChannel::GetRolloffFactor() const { return m_rolloffFactor; }
-float al::SoloudSoundChannel::GetRoomRolloffFactor() const { return m_roomRolloffFactor; }
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetRolloffFactors() const { return {m_rolloffFactor, m_roomRolloffFactor}; }
+float pragma::audio::SoloudSoundChannel::GetRolloffFactor() const { return m_rolloffFactor; }
+float pragma::audio::SoloudSoundChannel::GetRoomRolloffFactor() const { return m_roomRolloffFactor; }
 
-void al::SoloudSoundChannel::SetDopplerFactor(float factor) { m_dopplerFactor = factor; }
-float al::SoloudSoundChannel::GetDopplerFactor() const { return m_dopplerFactor; }
+void pragma::audio::SoloudSoundChannel::SetDopplerFactor(float factor) { m_dopplerFactor = factor; }
+float pragma::audio::SoloudSoundChannel::GetDopplerFactor() const { return m_dopplerFactor; }
 
-void al::SoloudSoundChannel::SetRelative(bool bRelative) { m_relative = bRelative; }
-bool al::SoloudSoundChannel::IsRelative() const { return m_relative; }
+void pragma::audio::SoloudSoundChannel::SetRelative(bool bRelative) { m_relative = bRelative; }
+bool pragma::audio::SoloudSoundChannel::IsRelative() const { return m_relative; }
 
-void al::SoloudSoundChannel::SetRadius(float radius)
+void pragma::audio::SoloudSoundChannel::SetRadius(float radius)
 {
 	m_radius = radius;
 	if(m_handle)
 		GetSoloudEngine().set3dSourceMinMaxDistance(m_handle, GetReferenceDistance(), radius);
 }
-float al::SoloudSoundChannel::GetRadius() const { return m_radius; }
+float pragma::audio::SoloudSoundChannel::GetRadius() const { return m_radius; }
 
-void al::SoloudSoundChannel::SetStereoAngles(float leftAngle, float rightAngle)
+void pragma::audio::SoloudSoundChannel::SetStereoAngles(float leftAngle, float rightAngle)
 {
 	m_stereoLeftAngle = leftAngle;
 	m_stereoRightAngle = rightAngle;
 }
-std::pair<float, float> al::SoloudSoundChannel::GetStereoAngles() const { return {m_stereoLeftAngle, m_stereoRightAngle}; }
-void al::SoloudSoundChannel::SetAirAbsorptionFactor(float factor) { m_airAbsorptionFactor = factor; }
-float al::SoloudSoundChannel::GetAirAbsorptionFactor() const { return m_airAbsorptionFactor; }
+std::pair<float, float> pragma::audio::SoloudSoundChannel::GetStereoAngles() const { return {m_stereoLeftAngle, m_stereoRightAngle}; }
+void pragma::audio::SoloudSoundChannel::SetAirAbsorptionFactor(float factor) { m_airAbsorptionFactor = factor; }
+float pragma::audio::SoloudSoundChannel::GetAirAbsorptionFactor() const { return m_airAbsorptionFactor; }
 
-void al::SoloudSoundChannel::SetGainAuto(bool directHF, bool send, bool sendHF)
+void pragma::audio::SoloudSoundChannel::SetGainAuto(bool directHF, bool send, bool sendHF)
 {
 	m_directGainHfAuto = directHF;
 	m_sendGainAuto = send;
 	m_sendGainHfAuto = sendHF;
 }
-std::tuple<bool, bool, bool> al::SoloudSoundChannel::GetGainAuto() const { return {m_directGainHfAuto, m_sendGainAuto, m_sendGainHfAuto}; }
-bool al::SoloudSoundChannel::GetDirectGainHFAuto() const { return m_directGainHfAuto; }
-bool al::SoloudSoundChannel::GetSendGainAuto() const { return m_sendGainAuto; }
-bool al::SoloudSoundChannel::GetSendGainHFAuto() const { return m_sendGainHfAuto; }
+std::tuple<bool, bool, bool> pragma::audio::SoloudSoundChannel::GetGainAuto() const { return {m_directGainHfAuto, m_sendGainAuto, m_sendGainHfAuto}; }
+bool pragma::audio::SoloudSoundChannel::GetDirectGainHFAuto() const { return m_directGainHfAuto; }
+bool pragma::audio::SoloudSoundChannel::GetSendGainAuto() const { return m_sendGainAuto; }
+bool pragma::audio::SoloudSoundChannel::GetSendGainHFAuto() const { return m_sendGainHfAuto; }
 
-void al::SoloudSoundChannel::SetDirectFilter(const EffectParams &params) {}
-void al::SoloudSoundChannel::SetEffectParameters(uint32_t slotId, const EffectParams &params) {}
+void pragma::audio::SoloudSoundChannel::SetDirectFilter(const EffectParams &params) {}
+void pragma::audio::SoloudSoundChannel::SetEffectParameters(uint32_t slotId, const EffectParams &params) {}
 
-void al::SoloudSoundSystem::SetSpeedOfSound(float speed) { m_soloud.set3dSoundSpeed(speed); }
+void pragma::audio::SoloudSoundSystem::SetSpeedOfSound(float speed) { m_soloud.set3dSoundSpeed(speed); }
 
-al::PSoundChannel al::SoloudSoundSystem::CreateChannel(ISoundBuffer &buffer)
+pragma::audio::PSoundChannel pragma::audio::SoloudSoundSystem::CreateChannel(ISoundBuffer &buffer)
 {
 	SoLoud::WavInstance instance {&static_cast<SoloudSoundBuffer &>(buffer).GetSoloudWave()};
 	return std::make_shared<SoloudSoundChannel>(*this, buffer, std::move(instance));
 }
-al::ISoundBuffer *al::SoloudSoundSystem::DoLoadSound(const std::string &path, bool bConvertToMono, bool bAsync)
+pragma::audio::ISoundBuffer *pragma::audio::SoloudSoundSystem::DoLoadSound(const std::string &path, bool bConvertToMono, bool bAsync)
 {
 	std::string absPath;
-	if(!FileManager::FindAbsolutePath(path, absPath))
+	if(!pragma::fs::find_absolute_path(path, absPath))
 		return nullptr;
 	auto buf = std::make_shared<SoloudSoundBuffer>();
 	auto &wave = buf->GetSoloudWave();
 	auto res = static_cast<SoloudError>(wave.load(absPath.c_str()));
-	if(res != al::SoloudError::NoError)
+	if(res != pragma::audio::SoloudError::NoError)
 		return nullptr;
 	if(buf->IsMono() || bConvertToMono == true)
 		m_buffers[path].mono = buf;
@@ -413,34 +413,34 @@ al::ISoundBuffer *al::SoloudSoundSystem::DoLoadSound(const std::string &path, bo
 		m_buffers[path].stereo = buf;
 	return buf.get();
 }
-std::unique_ptr<al::IListener> al::SoloudSoundSystem::CreateListener() { return std::make_unique<SoloudListener>(*this); }
+std::unique_ptr<pragma::audio::IListener> pragma::audio::SoloudSoundSystem::CreateListener() { return std::make_unique<SoloudListener>(*this); }
 
 ///////////////
 
-al::SoloudSoundBuffer::SoloudSoundBuffer() {}
+pragma::audio::SoloudSoundBuffer::SoloudSoundBuffer() {}
 
 ///////////////
 
-void al::SoloudListener::SetGain(float gain)
+void pragma::audio::SoloudListener::SetGain(float gain)
 {
 	// TODO
 }
-void al::SoloudListener::SetPosition(const Vector3 &pos) { static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerPosition(pos.x, pos.y, pos.z); }
-void al::SoloudListener::SetVelocity(const Vector3 &vel) { static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerVelocity(vel.x, vel.y, vel.z); }
-void al::SoloudListener::SetOrientation(const Vector3 &at, const Vector3 &up)
+void pragma::audio::SoloudListener::SetPosition(const Vector3 &pos) { static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerPosition(pos.x, pos.y, pos.z); }
+void pragma::audio::SoloudListener::SetVelocity(const Vector3 &vel) { static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerVelocity(vel.x, vel.y, vel.z); }
+void pragma::audio::SoloudListener::SetOrientation(const Vector3 &at, const Vector3 &up)
 {
 	static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerAt(at.x, at.y, at.z);
 	static_cast<SoloudSoundSystem &>(m_soundSystem).GetSoloudEngine().set3dListenerUp(up.x, up.y, up.z);
 }
 
 extern "C" {
-PR_EXPORT bool initialize_audio_api(float metersPerUnit, std::shared_ptr<al::ISoundSystem> &outSoundSystem, std::string &errMsg)
+PR_EXPORT bool initialize_audio_api(float metersPerUnit, std::shared_ptr<pragma::audio::ISoundSystem> &outSoundSystem, std::string &errMsg)
 {
-	auto sys = std::shared_ptr<al::SoloudSoundSystem>(new al::SoloudSoundSystem {metersPerUnit}, [](al::SoloudSoundSystem *sys) {
+	auto sys = std::shared_ptr<pragma::audio::SoloudSoundSystem>(new pragma::audio::SoloudSoundSystem {metersPerUnit}, [](pragma::audio::SoloudSoundSystem *sys) {
 		sys->OnRelease();
 		delete sys;
 	});
-	if(sys->Initialize() != al::SoloudError::NoError)
+	if(sys->Initialize() != pragma::audio::SoloudError::NoError)
 		return false;
 	outSoundSystem = sys;
 	return true;
