@@ -25,7 +25,7 @@ namespace pragma::audio {
 	  public:
 		SoloudSoundSystem(float metersPerUnit);
 		~SoloudSoundSystem() override;
-		SoloudError Initialize();
+		std::expected<void, std::pair<SoloudError, std::string>> Initialize();
 
 		virtual PEffect CreateEffect() { return nullptr; }
 		virtual IAuxiliaryEffectSlot *CreateAuxiliaryEffectSlot() override { return nullptr; }
@@ -219,12 +219,18 @@ pragma::audio::SoloudSoundSystem::SoloudSoundSystem(float metersPerUnit) : ISoun
 
 pragma::audio::SoloudSoundSystem::~SoloudSoundSystem() { m_soloud.deinit(); }
 
-pragma::audio::SoloudError pragma::audio::SoloudSoundSystem::Initialize()
+std::expected<void, std::pair<pragma::audio::SoloudError, std::string>> pragma::audio::SoloudSoundSystem::Initialize()
 {
-	auto err = static_cast<SoloudError>(m_soloud.init());
-	if(err == pragma::audio::SoloudError::NoError)
-		pragma::audio::ISoundSystem::Initialize();
-	return err;
+	auto solErr = m_soloud.init();
+	auto err = static_cast<SoloudError>(solErr);
+	if(err != SoloudError::NoError) {
+		auto *errMsg = m_soloud.getErrorString(solErr);
+		if(!errMsg)
+			errMsg = "Unknown error.";
+		return std::unexpected {std::pair<pragma::audio::SoloudError, std::string> {err, errMsg}};
+	}
+	ISoundSystem::Initialize();
+	return {};
 }
 
 void pragma::audio::SoloudSoundChannel::Play()
@@ -440,8 +446,11 @@ PR_EXPORT bool initialize_audio_api(float metersPerUnit, std::shared_ptr<pragma:
 		sys->OnRelease();
 		delete sys;
 	});
-	if(sys->Initialize() != pragma::audio::SoloudError::NoError)
+	auto res = sys->Initialize();
+	if(!res) {
+		errMsg = std::format("Failed to initialize soloud: {} (Error code '{}')", res.error().second, magic_enum::enum_name(res.error().first));
 		return false;
+	}
 	outSoundSystem = sys;
 	return true;
 }
